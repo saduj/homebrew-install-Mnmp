@@ -1,35 +1,55 @@
-# homebrew安装本地开发环境搭建
-## 搭建List
-### 系统方面
-- [x] Homebrew
-- [x] Node => v14.20.0
-- [x] Npm => v6.14.17 (Node自带)
-- [x] Python => 2.7.18
-- [x] Git
-- [x] Composer
-- [x] Xcode Command Line Tools（命令行工具）
+# HG本地开发环境搭建
 
-### 安装Nginx+Mysql+PHP+Memcached
-- [x] Memcached
-- [x] Nginx
-- [x] Mysql=>5.7
-- [x] PHP => 7.2
-    - [x] Mongodb（没用到，是否删除）
-    - [x] yaml-2.2.2
-        - [x] libyaml
-    - [x] yaf-3.3.5
-    - [x] memcached-3.2.0
-        - [x] zlib
-        - [x] libmemcached
-        - [x] pkg-config
-    - [x] phalcon-3.4.5
+## 目录
+- [1. 搭建列表](#1搭建列表)
+- [2. 添加到admin用户组权限](#2添加到admin用户组权限)
+- [3. 安装Homebrew](#3安装Homebrew)
+- [4. 安装php@7.2](#4安装php@7.2)
+    - [4.1 安装yaml-2.2.2](#41-安装yaml-2.2.2)
+    - [4.2 安装yaf-3.3.5](#42-安装yaf-3.3.5)
+    - [4.3 安装memcached-3.2.0](#43-安装memcached-3.2.0)
+    - [4.4 安装phalcon-3.4.5](#44-安装phalcon-3.4.5)
+- [5. 安装Mongodb](#5安装Mongodb)
+- [6. 安装Memcached](#6安装Memcached)
+- [7. 安装Nginx](#7安装Nginx)
+- [8. 安装Mysql](#8安装Mysql)
+- [9. 安装Node-v14.20.0](#9安装Node-v14.20.0)
+- [10. 安装Python-2.7.18](#10安装Python-2.7.18)
+- [11. 安装composer](#11安装composer)
+- [12. 安装git](#12安装git)
+- [13. 快捷命令汇总](#13快捷命令汇总)
 
-## 添加到admin用户组权限
+### 1. 搭建列表</span>
+```
+├── Homebrew                    
+│   ├── PHP=>7.2
+│       ├── Mongodb
+│       ├── yaml-2.2.2
+│           ├── libyaml
+│       ├── yaf-3.3.5
+│       ├── memcached-3.2.0
+│           ├── zlib
+│           ├── libmemcached
+│           ├── pkg-config
+│       ├── phalcon-3.4.5                  
+├── Node => v14.20.0       
+├── Npm => v6.14.17 (Node自带)
+├── Python => 2.7.18  
+├── Git                                
+├── Composer                        
+├── Xcode Command Line Tools（命令行工具）          
+├── Memcached
+├── Nginx                        
+└── Mysql=>5.7                         
+```
+
+### 2.添加到admin用户组权限
 ```
 sudo chown -R whoami:admin /usr/local/
 ```
+-------
 
-## 安装Homebrew
+### 3.安装Homebrew
 ```
     # 安装Homebrew时需要xcode Command Line Tools，避免homebrew安装时间过长，可先行安装（ps：建议删除重新安装新版本）
     
@@ -41,12 +61,17 @@ sudo chown -R whoami:admin /usr/local/
     
     #下载homebrew （ps：安装完之后别忘记切换国内的源）
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    
+    # 查看brew版本
+    brew --version
+    
+    # 查看brew源
+    brew --config
     # 找个国内源? 或者让自行解决？
 ```
 -------
 
-## 安装PHP环境&扩展
-#### brew安装php@7.2
+### 4.安装php@7.2
 ```
     # 由于PHP 7.2官方已不再维护，需添加第三方仓库
     //将第三方仓库加入brew
@@ -66,10 +91,12 @@ sudo chown -R whoami:admin /usr/local/
     
     # 重新加载资源
     source ~/.zshrc
+    
+    # 重启php-fpm
+    brew services start|restart php@7.2
 ```
--------
 
-#### 安装yaml-2.2.2
+### 4.1安装yaml-2.2.2
 ```
     # 安装libyaml依赖
     brew install libyaml
@@ -80,15 +107,23 @@ sudo chown -R whoami:admin /usr/local/
     // 如果找不到可以用以下命令查找路径（ps：推荐用这个，后续小版本升级不会影响到）
     brew --prefix --installed libyaml
     
-    # pecl安装 yaml-2.2.2
-    pecl install yaml-2.2.2   
+    # pecl安装 yaml-2.2.2,根据提示输入需要的依赖的路径
+    pecl install yaml-2.2.2
+    
+    # 重启php-fpm
+    brew services restart php@7.2
+    
+    # 查看扩展是否生效（或者 查看phpinfo()）
+    php -m
 ```
--------
 
-#### 安装yaf-3.3.5
+### 4.2安装yaf-3.3.5
 ```
     # yaf-3.3.5
     pecl install yaf-3.3.5 
+   
+    # php.ini路径
+    /usr/lcoal/etc/php/7.2/php.ini
    
     # 在php.ini中添加yaf相关配置
     [yaf]
@@ -101,10 +136,16 @@ sudo chown -R whoami:admin /usr/local/
     yaf.use_namespace = 1
     yaf.use_spl_autoload = 1
     yaf.use_spl_autoload=1
+    
+    # 重启php-fpm
+    brew services restart php@7.2
+    
+    # 查看扩展是否生效（或者 查看phpinfo()）
+    php -m
+    
 ```
--------
 
-#### 安装memcached-3.2.0
+### 4.3安装memcached-3.2.0
 ```
     # 安装libmemcached
     brew install libmemcached
@@ -127,13 +168,17 @@ sudo chown -R whoami:admin /usr/local/
     # 安装pkg-config
     brew install pkg-config 
     
-    # 安装memcached-3.2.0
+    # 安装memcached-3.2.0,根据提示输入需要的依赖的路径
     pecl install memcached-3.2.0
     
+    # 重启php-fpm
+    brew services restart php@7.2
+    
+    # 查看扩展是否生效（或者 查看phpinfo()）
+    php -m
 ```
--------
 
-#### 安装phalcon-3.4.5
+### 4.4安装phalcon-3.4.5
 ```
     # 打开terminal 一行一行的粘贴执行
     PHALCON_VERSION=3.4.5
@@ -144,17 +189,29 @@ sudo chown -R whoami:admin /usr/local/
     cd ../../
     rm -r cphalcon-${PHALCON_VERSION}
     
-    # 添加.so文件到php.ini
-    extension=phalcon.so
-```
-#### 安装Mongodb
-```
-    # 安装
-    pecl install mongodb
+    # 重启php-fpm
+    brew services restart php@7.2
+    
+    # 查看扩展是否生效（或者 查看phpinfo()）
+    php -m
+    
 ```
 -------
 
-## 安装Memcached
+### 5.安装Mongodb（选装）
+```
+    # 安装
+    pecl install mongodb
+    
+    # 重启php-fpm
+    brew services restart php@7.2
+    
+    # 查看扩展是否生效（或者 查看phpinfo()）
+    php -m
+```
+-------
+
+### 6.安装Memcached
 ```
     # 安装
     brew install memcached
@@ -168,8 +225,9 @@ sudo chown -R whoami:admin /usr/local/
     # 没有telnet
     brew install telnet
 ```
+-------
 
-## 安装Nginx
+### 7.安装Nginx
 ```
     # Nginx
     brew install nginx
@@ -183,7 +241,9 @@ sudo chown -R whoami:admin /usr/local/
     #检查nginx是否生效
     localhost:8080 
 ```
-## 安装Mysql
+-------
+
+### 8.安装Mysql
 ```
     # Mysql5.7
     brew install mysql@5.7
@@ -197,12 +257,15 @@ sudo chown -R whoami:admin /usr/local/
     echo 'export LDFLAGS="-L/usr/local/opt/mysql@5.7/lib"' >> ~/.zshrc
     echo 'export CPPFLAGS="-I/usr/local/opt/mysql@5.7/include"' >> ~/.zshrc
     
+    # 重新加载资源
+    source ~/.zshrc
+    
     # 连接
     mysql -u root -p
 ```
 -------
 
-## 安装Node v14.20.0
+### 9.安装Node v14.20.0
 ```
     # 安装
     brew install node@14
@@ -211,10 +274,13 @@ sudo chown -R whoami:admin /usr/local/
     echo 'export PATH="/usr/local/opt/node@14/bin:$PATH"' >> ~/.zshrc
     echo 'export LDFLAGS="-L/usr/local/opt/node@14/lib"' >> ~/.zshrc
     echo 'export CPPFLAGS="-phalconI/usr/local/opt/node@14/include"' >> ~/.zshrc
+    
+    # 重新加载资源
+    source ~/.zshrc
 ```
 -------
 
-## 安装Python-2.7.18
+### 10.安装Python-2.7.18
 ```
     # 安装 pyenv（ps：由于brew不支持安装旧版本的python，需要通过pyenv安装,或者去官网下载对应版本的pkg，也可）
     brew install pyenv
@@ -227,6 +293,9 @@ sudo chown -R whoami:admin /usr/local/
     echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.zshrc
     echo 'eval "$(pyenv init -)"' >> ~/.zshrc
     
+    # 重新加载资源
+    source ~/.zshrc
+    
     # 全局管理python版本
     pyenv global 2.7.18
     
@@ -235,19 +304,27 @@ sudo chown -R whoami:admin /usr/local/
 ```
 -------
 
-## 安装composer
+### 11.安装composer
 ```
     # 安装
     brew install composer 
+    
+    # 检查
+    composer
 ```
 -------
 
-## 安装git
+## 12.安装git
 ```
     # 安装
     brew install git
+    
+    # 检查
+    git --version
 ```
-## 快捷命令汇总
+-------
+
+## 13.快捷命令汇总
 ```
     # 查询brew安装服务
     brew services list
@@ -263,7 +340,7 @@ sudo chown -R whoami:admin /usr/local/
     
     # php-fpm 默认日志
     /usr/local/var/log/php-fpm.log
+    
+    # php.ini路径
+    /usr/lcoal/etc/php/7.2/php.ini
 ```
-
-
-
